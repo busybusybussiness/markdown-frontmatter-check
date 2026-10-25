@@ -1,0 +1,25 @@
+name: 'Markdown Frontmatter Check'
+description: 'Fail CI when markdown files lack required YAML frontmatter keys with the right types (flat keys only).'
+inputs:
+  files:
+    description: 'Glob of markdown files to check (e.g. content/**/*.md)'
+    required: true
+    default: '**/*.md'
+  required:
+    description: 'Comma-separated key:type list. Types: string, bool, date (YYYY-MM-DD), list'
+    required: true
+    default: 'title:string,date:date'
+runs:
+  using: 'composite'
+  steps:
+    - name: Check frontmatter
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        FM_FILES: ${{ inputs.files }}
+        FM_REQUIRED: ${{ inputs.required }}
+      run: |
+        set -euo pipefail
+        PY=python3
+        command -v python3 >/dev/null 2>&1 || PY=python
+        "$PY" "$ACTION_PATH/check_frontmatter.py" "$FM_FILES" "$FM_REQUIRED"
